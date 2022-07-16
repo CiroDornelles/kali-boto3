@@ -5,6 +5,7 @@ import threading as th
 import time 
 import boto3
 import subprocess
+import os 
 
 
 pathImagens = "/home/ciro/Documentos/pythonkali/"
@@ -41,10 +42,31 @@ def ligar(icon, item):
 def desligar(icon, item):
     ec2instance.Instance("i-02aff84ed2b75de02").stop()
     estadoInstancia(10,True,"stopped")
+
+def sshConnection():
+    import subprocess
+    comando =["konsole" ,"-e" , "/home/ciro/Documentos/pythonkali/ssh.sh" ]
+    subprocess.Popen(comando)
+
+def portFowarding():
+    pass
+
+def montarDrive():
+    pass
+
+def sair():
+    icon.stop()
+    
     
 icon = pystray.Icon("Kali Linux", image, menu=pystray.Menu(
     pystray.MenuItem("ligar instancia", ligar), 
-    pystray.MenuItem("Desligar instancia", desligar) 
+    pystray.MenuItem("Desligar instancia", desligar), 
+    pystray.MenuItem("Tarefas Administrativas",pystray.Menu(
+        pystray.MenuItem("Conexão ssh",sshConnection),
+        pystray.MenuItem("Port Fowarding", portFowarding),
+        pystray.MenuItem("Montar Drive", montarDrive)
+    )),
+    pystray.MenuItem("Sair",sair)
 ))
 
 
