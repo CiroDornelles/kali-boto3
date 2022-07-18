@@ -1,13 +1,14 @@
-#!/usr/bin/env python3
+#!/usr/bin/python
 import pystray
 import PIL.Image
 import threading as th
 import time 
 import boto3
-import subprocess
+from subprocess import Popen
 import os 
 
 
+idInstancia = "i-02aff84ed2b75de02"
 pathImagens = "/home/ciro/Documentos/pythonkali/"
 ec2instance = boto3.resource("ec2")
 images = ["imagens/verde.png","imagens/amarelo.png","imagens/vermelho.png"]
@@ -25,7 +26,7 @@ def iconeinstancia(estado):
 def estadoInstancia(sleepTime,button,estadoDesejado):
     var = True
     while var:
-        maquinaKali = ec2instance.Instance("i-02aff84ed2b75de02")
+        maquinaKali = ec2instance.Instance(idInstancia)
         estado = maquinaKali.state.copy()
         estado = estado["Name"]
         icon.icon = iconeinstancia(estado)
@@ -36,17 +37,16 @@ def estadoInstancia(sleepTime,button,estadoDesejado):
 timer = th.Timer(0.1, estadoInstancia,[300,False,"none"])
 
 def ligar(icon, item):
-    ec2instance.Instance("i-02aff84ed2b75de02").start()
+    ec2instance.Instance(idInstancia).start()
     estadoInstancia(10,True,"running")
     
 def desligar(icon, item):
-    ec2instance.Instance("i-02aff84ed2b75de02").stop()
+    ec2instance.Instance(idInstancia).stop()
     estadoInstancia(10,True,"stopped")
 
 def sshConnection():
-    import subprocess
-    comando =["konsole" ,"-e" , "/home/ciro/Documentos/pythonkali/ssh.sh" ]
-    subprocess.Popen(comando)
+    comando =["konsole" ,"-e" , "ssh" ,"-i" ,"/home/ciro/.ssh/security-team.pem" , "kali@ec2-34-200-170-222.compute-1.amazonaws.com" ]    
+    Popen(comando)
 
 def portFowarding():
     pass
@@ -55,7 +55,9 @@ def montarDrive():
     pass
 
 def sair():
-    icon.stop()
+    pid = os.getpid()
+    command = ['kill','-9', str(pid)]
+    Popen(command)
     
     
 icon = pystray.Icon("Kali Linux", image, menu=pystray.Menu(
